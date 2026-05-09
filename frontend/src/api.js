@@ -2,7 +2,12 @@ const BASE = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api`
   : "/api";
 
-async function req(method, path, body, token) {
+function getToken() {
+  return localStorage.getItem("ml_token");
+}
+
+async function req(method, path, body) {
+  const token = getToken();
   const opts = {
     method,
     headers: {
@@ -19,14 +24,17 @@ async function req(method, path, body, token) {
   return res.json();
 }
 
-export function createApi(token) {
-  return {
-    getExpenses:   (month) => req("GET",    `/expenses${month ? `?month=${month}` : ""}`, null, token),
-    parseExpense:  (text)  => req("POST",   "/expenses/parse", { text }, token),
-    addExpense:    (data)  => req("POST",   "/expenses", data, token),
-    deleteExpense: (id)    => req("DELETE", `/expenses/${id}`, null, token),
-    getStats:      (month) => req("GET",    `/expenses/stats${month ? `?month=${month}` : ""}`, null, token),
-    getInsights:   (month) => req("GET",    `/insights${month ? `?month=${month}` : ""}`, null, token),
-    getReport:     (month) => req("GET",    `/insights/report${month ? `?month=${month}` : ""}`, null, token),
-  };
-}
+export const api = {
+  // Auth
+  signup: (email, password, name) => req("POST", "/auth/signup", { email, password, name }),
+  login:  (email, password)       => req("POST", "/auth/login",  { email, password }),
+
+  // Expenses
+  getExpenses:   (month) => req("GET",    `/expenses${month ? `?month=${month}` : ""}`),
+  parseExpense:  (text)  => req("POST",   "/expenses/parse", { text }),
+  addExpense:    (data)  => req("POST",   "/expenses", data),
+  deleteExpense: (id)    => req("DELETE", `/expenses/${id}`),
+  getStats:      (month) => req("GET",    `/expenses/stats${month ? `?month=${month}` : ""}`),
+  getInsights:   (month) => req("GET",    `/insights${month ? `?month=${month}` : ""}`),
+  getReport:     (month) => req("GET",    `/insights/report${month ? `?month=${month}` : ""}`),
+};

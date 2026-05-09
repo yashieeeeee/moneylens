@@ -1,4 +1,3 @@
-import { useAuth, UserButton } from "@clerk/clerk-react";
 import { useState, useEffect } from "react";
 import Login from "./components/Login";
 import Sidebar from "./components/Sidebar";
@@ -6,8 +5,8 @@ import Dashboard from "./components/Dashboard";
 import ChatEntry from "./components/ChatEntry";
 import Insights from "./components/Insights";
 import History from "./components/History";
-import { createApi } from "./api";
 import { currentMonth } from "./config";
+import { api } from "./api";
 
 const NAV_ITEMS = [
   { id: "overview", icon: "◈",  label: "Overview" },
@@ -24,37 +23,31 @@ const PAGE_META = {
 };
 
 export default function App() {
-  const { isSignedIn, isLoaded, getToken } = useAuth();
+  const [user, setUser] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("ml_user")); } catch { return null; }
+  });
   const [tab, setTab] = useState("overview");
   const [refresh, setRefresh] = useState(0);
   const [headerStats, setHeaderStats] = useState({ total: null, count: null });
-  const [api, setApi] = useState(null);
 
   function bump() { setRefresh((r) => r + 1); }
 
-  // Build api object once token is available
-  useEffect(() => {
-    if (!isSignedIn) return;
-    getToken().then((token) => {
-      setApi(createApi(token));
-    });
-  }, [isSignedIn, refresh]);
+  function handleLogin(u) { setUser(u); }
 
-  // Fetch header stats once api is ready
+  function handleLogout() {
+    localStorage.removeItem("ml_token");
+    localStorage.removeItem("ml_user");
+    setUser(null);
+  }
+
   useEffect(() => {
-    if (!api) return;
+    if (!user) return;
     api.getStats(currentMonth())
       .then((s) => setHeaderStats({ total: s.total, count: s.count }))
       .catch(() => {});
-  }, [api]);
+  }, [refresh, user]);
 
-  if (!isLoaded) return (
-    <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)" }}>
-      <div style={{ color: "var(--text3)", fontSize: 13 }}>Loading…</div>
-    </div>
-  );
-
-  if (!isSignedIn) return <Login />;
+  if (!user) return <Login onLogin={handleLogin} />;
 
   const page = PAGE_META[tab];
 
@@ -107,15 +100,35 @@ export default function App() {
             }}>
               {new Date().toLocaleString("en-IN", { month: "short", year: "numeric" })}
             </div>
-            <UserButton afterSignOutUrl="/" />
+            {/* User info + logout */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <div style={{
+                width: 30, height: 30, borderRadius: "50%",
+                background: "var(--accent-bg)", border: "1px solid rgba(110,231,183,0.3)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 12, fontWeight: 700, color: "var(--accent)",
+              }}>
+                {user.name?.[0]?.toUpperCase() || "U"}
+              </div>
+              <button onClick={handleLogout} style={{
+                fontSize: 11, color: "var(--text3)", padding: "5px 10px",
+                borderRadius: "var(--r-md)", border: "1px solid var(--border)",
+                background: "transparent", transition: "all .15s",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--red)"; e.currentTarget.style.borderColor = "rgba(248,113,113,0.3)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text3)"; e.currentTarget.style.borderColor = "var(--border)"; }}
+              >
+                Sign out
+              </button>
+            </div>
           </div>
         </header>
 
         <main className="page-body" style={{ flex: 1, overflowY: "auto", padding: "24px 28px" }}>
-          {tab === "overview" && <Dashboard refresh={refresh} api={api} />}
-          {tab === "add"      && <ChatEntry onExpenseAdded={bump} api={api} />}
-          {tab === "insights" && <Insights  refresh={refresh} api={api} />}
-          {tab === "history"  && <History   refresh={refresh} onDelete={bump} api={api} />}
+          {tab === "overview" && <Dashboard refresh={refresh} />}
+          {tab === "add"      && <ChatEntry onExpenseAdded={bump} />}
+          {tab === "insights" && <Insights  refresh={refresh} />}
+          {tab === "history"  && <History   refresh={refresh} onDelete={bump} />}
         </main>
       </div>
 

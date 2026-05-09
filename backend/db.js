@@ -7,6 +7,13 @@ const db = createClient({
 
 async function init() {
   await db.executeMultiple(`
+    CREATE TABLE IF NOT EXISTS users (
+      id            INTEGER PRIMARY KEY AUTOINCREMENT,
+      email         TEXT    NOT NULL UNIQUE,
+      password_hash TEXT    NOT NULL,
+      name          TEXT,
+      created_at    TEXT    NOT NULL DEFAULT (datetime('now'))
+    );
     CREATE TABLE IF NOT EXISTS expenses (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
       user_id     TEXT    NOT NULL,
