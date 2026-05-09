@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { api } from "../api";
+import { useApi } from "../api";      
 import { fmt, fmtDate, CATEGORIES, currentMonth } from "../config";
-
+const api=useApi();
 export default function History({ refresh, onDelete }) {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);

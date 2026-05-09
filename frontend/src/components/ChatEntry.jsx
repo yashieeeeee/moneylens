@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { api } from "../api";
+import { useApi } from "../api"; 
 import { fmt, CATEGORIES } from "../config";
-
+const api = useApi();
 const SUGGESTIONS = [
   "Spent 250 on Zomato",
   "Netflix 499",

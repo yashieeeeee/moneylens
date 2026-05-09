@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const { db } = require("../db");
-
+router.use(requireAuth);
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+
 
 async function callGroq(message, maxTokens = 1024, jsonMode = false) {
   const body = {
@@ -43,9 +44,9 @@ router.get("/", async (req, res) => {
   const month = req.query.month || new Date().toISOString().slice(0, 7);
   try {
     const result = await db.execute({
-      sql: `SELECT * FROM expenses WHERE date LIKE ? ORDER BY date ASC`,
-      args: [`${month}%`],
-    });
+  sql: `SELECT * FROM expenses WHERE user_id = ? AND date LIKE ? ORDER BY date ASC`,
+  args: [req.userId, `${month}%`],
+});
     const expenses = result.rows;
 
     if (expenses.length === 0) {
@@ -84,9 +85,9 @@ router.get("/report", async (req, res) => {
   const month = req.query.month || new Date().toISOString().slice(0, 7);
   try {
     const result = await db.execute({
-      sql: `SELECT * FROM expenses WHERE date LIKE ? ORDER BY date ASC`,
-      args: [`${month}%`],
-    });
+  sql: `SELECT * FROM expenses WHERE user_id = ? AND date LIKE ? ORDER BY date ASC`,
+  args: [req.userId, `${month}%`],
+});
     const expenses = result.rows;
     if (expenses.length === 0) return res.json({ report: "No expenses found for this month." });
 

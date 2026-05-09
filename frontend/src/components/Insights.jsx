@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { api } from "../api";
+import { useApi } from "../api";      
 import { fmt, currentMonth, monthLabel } from "../config";
-
+const api=useApi();
 const TYPE = {
   warning: { border: "rgba(252,211,77,0.2)",  bg: "rgba(252,211,77,0.05)",  icon: "⚠️", label: "Heads up",   labelColor: "var(--amber)" },
   success: { border: "rgba(110,231,183,0.2)", bg: "rgba(110,231,183,0.05)", icon: "✅", label: "Good habit",  labelColor: "var(--green)" },

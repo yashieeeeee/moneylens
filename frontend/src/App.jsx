@@ -1,3 +1,5 @@
+import { useAuth, UserButton } from "@clerk/clerk-react";
+import Login from "./components/Login";
 import { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import Dashboard from "./components/Dashboard";
@@ -6,6 +8,7 @@ import Insights from "./components/Insights";
 import History from "./components/History";
 import { api } from "./api";
 import { currentMonth } from "./config";
+
 
 const NAV_ITEMS = [
   { id: "overview",  icon: "◈",  label: "Overview" },
@@ -22,6 +25,16 @@ const PAGE_META = {
 };
 
 export default function App() {
+  const { isSignedIn, isLoaded } = useAuth();
+
+if (!isLoaded) return (
+  <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)" }}>
+    <div style={{ color: "var(--text3)", fontSize: 13 }}>Loading…</div>
+  </div>
+);
+
+if (!isSignedIn) return <Login />;
+
   const [tab, setTab] = useState("overview");
   const [refresh, setRefresh] = useState(0);
   const [headerStats, setHeaderStats] = useState({ total: null, count: null });
@@ -92,7 +105,7 @@ export default function App() {
             ))}
           </div>
 
-          {/* Month badge */}
+          {/* Month badge */}<UserButton afterSignOutUrl="/" />
           <div style={{
             padding: "6px 12px", borderRadius: "var(--r-full)",
             background: "var(--surface)", border: "1px solid var(--border2)",

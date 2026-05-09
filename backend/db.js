@@ -9,6 +9,7 @@ async function init() {
   await db.executeMultiple(`
     CREATE TABLE IF NOT EXISTS expenses (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id     TEXT    NOT NULL,
       amount      REAL    NOT NULL,
       description TEXT    NOT NULL,
       category    TEXT    NOT NULL DEFAULT 'Other',
@@ -18,6 +19,7 @@ async function init() {
     );
     CREATE TABLE IF NOT EXISTS insights_cache (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id    TEXT    NOT NULL,
       month      TEXT    NOT NULL,
       content    TEXT    NOT NULL,
       created_at TEXT    NOT NULL DEFAULT (datetime('now'))
