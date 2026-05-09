@@ -36,8 +36,8 @@ router.get("/", async (req, res) => {
   try {
     const { month } = req.query;
     const r = month
-      ? await db.execute({ sql: `SELECT * FROM expenses WHERE user_id = ? AND date LIKE ? ORDER BY date DESC, id DESC`, args: [req.userId, `${month}%`] })
-      : await db.execute({ sql: `SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC, id DESC`, args: [req.userId] });
+      ? await db.execute({ sql: `SELECT * FROM expenses WHERE user_id = ? AND date LIKE ? ORDER BY date DESC, id DESC`, args: [String(req.userId), `${month}%`] })
+      : await db.execute({ sql: `SELECT * FROM expenses WHERE user_id = ? ORDER BY date DESC, id DESC`, args: [String(req.userId)] });
     res.json({ expenses: r.rows });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -56,7 +56,7 @@ Rules: Zomato/Swiggy=Food, Uber/Ola=Transport, Netflix/Spotify=Subscriptions, Am
       return res.status(422).json({ error: `Could not parse amount from: "${text}"` });
     const r = await db.execute({
       sql: `INSERT INTO expenses (user_id, amount, description, category, merchant, date) VALUES (?, ?, ?, ?, ?, ?)`,
-      args: [req.userId, Number(parsed.amount), parsed.description || text, CATEGORIES.includes(parsed.category) ? parsed.category : "Other", parsed.merchant || "", new Date().toISOString().split("T")[0]],
+      args: [String(req.userId), Number(parsed.amount), parsed.description || text, CATEGORIES.includes(parsed.category) ? parsed.category : "Other", parsed.merchant || "", new Date().toISOString().split("T")[0]],
     });
     const row = await db.execute({ sql: `SELECT * FROM expenses WHERE id = ?`, args: [r.lastInsertRowid] });
     res.json({ expense: row.rows[0], parsed });
@@ -70,7 +70,7 @@ router.post("/", async (req, res) => {
   try {
     const r = await db.execute({
       sql: `INSERT INTO expenses (user_id, amount, description, category, merchant, date) VALUES (?, ?, ?, ?, ?, ?)`,
-      args: [req.userId, parseFloat(amount), description, CATEGORIES.includes(category) ? category : "Other", merchant || "", date || new Date().toISOString().split("T")[0]],
+      args: [String(req.userId), parseFloat(amount), description, CATEGORIES.includes(category) ? category : "Other", merchant || "", date || new Date().toISOString().split("T")[0]],
     });
     const row = await db.execute({ sql: `SELECT * FROM expenses WHERE id = ?`, args: [r.lastInsertRowid] });
     res.json({ expense: row.rows[0] });
@@ -80,7 +80,7 @@ router.post("/", async (req, res) => {
 // DELETE /api/expenses/:id
 router.delete("/:id", async (req, res) => {
   try {
-    await db.execute({ sql: `DELETE FROM expenses WHERE id = ? AND user_id = ?`, args: [req.params.id, req.userId] });
+    await db.execute({ sql: `DELETE FROM expenses WHERE id = ? AND user_id = ?`, args: [req.params.id, String(req.userId)] });
     res.json({ success: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -90,9 +90,9 @@ router.get("/stats", async (req, res) => {
   const month = req.query.month || new Date().toISOString().slice(0, 7);
   try {
     const [totals, byCategory, byDay] = await Promise.all([
-      db.execute({ sql: `SELECT COALESCE(SUM(amount),0) as total, COUNT(*) as count FROM expenses WHERE user_id = ? AND date LIKE ?`, args: [req.userId, `${month}%`] }),
-      db.execute({ sql: `SELECT category, SUM(amount) as total FROM expenses WHERE user_id = ? AND date LIKE ? GROUP BY category ORDER BY total DESC`, args: [req.userId, `${month}%`] }),
-      db.execute({ sql: `SELECT date, SUM(amount) as total FROM expenses WHERE user_id = ? AND date LIKE ? GROUP BY date ORDER BY date ASC`, args: [req.userId, `${month}%`] }),
+      db.execute({ sql: `SELECT COALESCE(SUM(amount),0) as total, COUNT(*) as count FROM expenses WHERE user_id = ? AND date LIKE ?`, args: [String(req.userId), `${month}%`] }),
+      db.execute({ sql: `SELECT category, SUM(amount) as total FROM expenses WHERE user_id = ? AND date LIKE ? GROUP BY category ORDER BY total DESC`, args: [String(req.userId), `${month}%`] }),
+      db.execute({ sql: `SELECT date, SUM(amount) as total FROM expenses WHERE user_id = ? AND date LIKE ? GROUP BY date ORDER BY date ASC`, args: [String(req.userId), `${month}%`] }),
     ]);
     res.json({ total: totals.rows[0].total, count: totals.rows[0].count, byCategory: byCategory.rows, byDay: byDay.rows });
   } catch (err) { res.status(500).json({ error: err.message }); }

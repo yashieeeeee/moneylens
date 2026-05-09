@@ -45,7 +45,7 @@ router.get("/", async (req, res) => {
   try {
     const result = await db.execute({
   sql: `SELECT * FROM expenses WHERE user_id = ? AND date LIKE ? ORDER BY date ASC`,
-  args: [req.userId, `${month}%`],
+  args: [String(req.userId), `${month}%`],
 });
     const expenses = result.rows;
 
@@ -86,7 +86,7 @@ router.get("/report", async (req, res) => {
   try {
     const result = await db.execute({
   sql: `SELECT * FROM expenses WHERE user_id = ? AND date LIKE ? ORDER BY date ASC`,
-  args: [req.userId, `${month}%`],
+  args: [String(req.userId), `${month}%`],
 });
     const expenses = result.rows;
     if (expenses.length === 0) return res.json({ report: "No expenses found for this month." });
