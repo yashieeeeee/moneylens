@@ -6,7 +6,7 @@ import Dashboard from "./components/Dashboard";
 import ChatEntry from "./components/ChatEntry";
 import Insights from "./components/Insights";
 import History from "./components/History";
-import { api } from "./api";
+
 import { currentMonth } from "./config";
 
 
