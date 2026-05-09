@@ -1,9 +1,9 @@
+import { api } from "../api"; 
 import { useEffect, useState } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, CategoryScale, LinearScale, BarElement } from "chart.js";
 import { Doughnut, Bar } from "react-chartjs-2";
 import { fmt, CATEGORIES, currentMonth } from "../config";
 import StatCard from "./StatCard";
-import { api } from "../api"; 
 ChartJS.register(ArcElement, Tooltip, CategoryScale, LinearScale, BarElement);
 
 function CategoryBar({ category, amount, total, delay }) {
