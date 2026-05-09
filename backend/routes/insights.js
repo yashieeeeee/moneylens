@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { db } = require("../db");
-router.use(requireAuth);
+const { requireAuth } = require("../middleware/auth");
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 
