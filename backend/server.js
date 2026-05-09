@@ -1,9 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-
-const expensesRouter = require("./routes/expenses");
-const insightsRouter = require("./routes/insights");
+const { init } = require("./db");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -14,28 +12,20 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error("CORS: origin not allowed"));
+  origin: (origin, cb) => {
+    if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+    cb(new Error("CORS: origin not allowed"));
   },
 }));
+
 app.use(express.json());
 
-app.get("/api/health", (_req, res) =>
-  res.json({ status: "ok", timestamp: new Date().toISOString() })
-);
-
-app.use("/api/expenses", expensesRouter);
-app.use("/api/insights", insightsRouter);
-
+app.get("/api/health", (_req, res) => res.json({ status: "ok" }));
+app.use("/api/expenses", require("./routes/expenses"));
+app.use("/api/insights", require("./routes/insights"));
 app.use((_req, res) => res.status(404).json({ error: "Not found" }));
-app.use((err, _req, res, _next) => {
-  console.error(err);
-  res.status(500).json({ error: "Internal server error" });
-});
+app.use((err, _req, res, _next) => res.status(500).json({ error: "Internal server error" }));
 
-app.listen(PORT, () => {
-  console.log(`\n🪙  MoneyLens backend running on http://localhost:${PORT}\n`);
-});
+init()
+  .then(() => app.listen(PORT, () => console.log(`🪙 MoneyLens running on http://localhost:${PORT}`)))
+  .catch((err) => { console.error("DB init failed:", err); process.exit(1); });

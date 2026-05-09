@@ -1,6 +1,6 @@
-// In production, set VITE_API_URL to your Render backend URL, e.g.:
-// VITE_API_URL=https://moneylens-api.onrender.com
-const BASE = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api` : "/api";
+const BASE = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api`
+  : "/api";
 
 async function req(method, path, body) {
   const opts = { method, headers: { "Content-Type": "application/json" } };
@@ -14,11 +14,11 @@ async function req(method, path, body) {
 }
 
 export const api = {
-  getExpenses:  (month) => req("GET",    `/expenses${month ? `?month=${month}` : ""}`),
-  parseExpense: (text)  => req("POST",   "/expenses/parse", { text }),
-  addExpense:   (data)  => req("POST",   "/expenses", data),
-  deleteExpense:(id)    => req("DELETE", `/expenses/${id}`),
-  getStats:     (month) => req("GET",    `/expenses/stats${month ? `?month=${month}` : ""}`),
-  getInsights:  (month) => req("GET",    `/insights${month ? `?month=${month}` : ""}`),
-  getReport:    (month) => req("GET",    `/insights/report${month ? `?month=${month}` : ""}`),
+  getExpenses:   (month) => req("GET",    `/expenses${month ? `?month=${month}` : ""}`),
+  parseExpense:  (text)  => req("POST",   "/expenses/parse", { text }),
+  addExpense:    (data)  => req("POST",   "/expenses", data),
+  deleteExpense: (id)    => req("DELETE", `/expenses/${id}`),
+  getStats:      (month) => req("GET",    `/expenses/stats${month ? `?month=${month}` : ""}`),
+  getInsights:   (month) => req("GET",    `/insights${month ? `?month=${month}` : ""}`),
+  getReport:     (month) => req("GET",    `/insights/report${month ? `?month=${month}` : ""}`),
 };
