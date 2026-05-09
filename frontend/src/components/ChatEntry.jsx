@@ -1,7 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useApi } from "../api"; 
 import { fmt, CATEGORIES } from "../config";
-const api = useApi();
 const SUGGESTIONS = [
   "Spent 250 on Zomato",
   "Netflix 499",
@@ -100,7 +98,7 @@ function Bubble({ msg }) {
   );
 }
 
-export default function ChatEntry({ onExpenseAdded }) {
+export default function ChatEntry({ onExpenseAdded,api }) {
   const [msgs, setMsgs] = useState([BOT_INTRO]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);

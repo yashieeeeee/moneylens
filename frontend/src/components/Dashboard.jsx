@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { Chart as ChartJS, ArcElement, Tooltip, CategoryScale, LinearScale, BarElement } from "chart.js";
 import { Doughnut, Bar } from "react-chartjs-2";
-import { useApi } from "../api";      
 import { fmt, CATEGORIES, currentMonth } from "../config";
 import StatCard from "./StatCard";
-const api = useApi();
 ChartJS.register(ArcElement, Tooltip, CategoryScale, LinearScale, BarElement);
 
 function CategoryBar({ category, amount, total, delay }) {
@@ -44,7 +42,7 @@ function CategoryBar({ category, amount, total, delay }) {
   );
 }
 
-export default function Dashboard({ refresh }) {
+export default function Dashboard({ refresh,api }) {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const month = currentMonth();

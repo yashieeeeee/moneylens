@@ -1,16 +1,13 @@
-import { useAuth } from "@clerk/clerk-react";
-
 const BASE = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api`
   : "/api";
 
-async function req(method, path, body, getToken) {
-  const token = await getToken();
+async function req(method, path, body, token) {
   const opts = {
     method,
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
+      ...(token ? { "Authorization": `Bearer ${token}` } : {}),
     },
   };
   if (body) opts.body = JSON.stringify(body);
@@ -22,16 +19,14 @@ async function req(method, path, body, getToken) {
   return res.json();
 }
 
-export function useApi() {
-  const { getToken } = useAuth();
-  const call = (method, path, body) => req(method, path, body, getToken);
+export function createApi(token) {
   return {
-    getExpenses:   (month) => call("GET",    `/expenses${month ? `?month=${month}` : ""}`),
-    parseExpense:  (text)  => call("POST",   "/expenses/parse", { text }),
-    addExpense:    (data)  => call("POST",   "/expenses", data),
-    deleteExpense: (id)    => call("DELETE", `/expenses/${id}`),
-    getStats:      (month) => call("GET",    `/expenses/stats${month ? `?month=${month}` : ""}`),
-    getInsights:   (month) => call("GET",    `/insights${month ? `?month=${month}` : ""}`),
-    getReport:     (month) => call("GET",    `/insights/report${month ? `?month=${month}` : ""}`),
+    getExpenses:   (month) => req("GET",    `/expenses${month ? `?month=${month}` : ""}`, null, token),
+    parseExpense:  (text)  => req("POST",   "/expenses/parse", { text }, token),
+    addExpense:    (data)  => req("POST",   "/expenses", data, token),
+    deleteExpense: (id)    => req("DELETE", `/expenses/${id}`, null, token),
+    getStats:      (month) => req("GET",    `/expenses/stats${month ? `?month=${month}` : ""}`, null, token),
+    getInsights:   (month) => req("GET",    `/insights${month ? `?month=${month}` : ""}`, null, token),
+    getReport:     (month) => req("GET",    `/insights/report${month ? `?month=${month}` : ""}`, null, token),
   };
 }

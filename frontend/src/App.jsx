@@ -6,7 +6,7 @@ import Dashboard from "./components/Dashboard";
 import ChatEntry from "./components/ChatEntry";
 import Insights from "./components/Insights";
 import History from "./components/History";
-import { useApi } from "./api";
+import { createApi } from "./api";
 import { currentMonth } from "./config";
 
 const NAV_ITEMS = [
@@ -24,20 +24,29 @@ const PAGE_META = {
 };
 
 export default function App() {
-  const { isSignedIn, isLoaded } = useAuth();
-  const api = useApi();
+  const { isSignedIn, isLoaded, getToken } = useAuth();
   const [tab, setTab] = useState("overview");
   const [refresh, setRefresh] = useState(0);
   const [headerStats, setHeaderStats] = useState({ total: null, count: null });
+  const [api, setApi] = useState(null);
 
   function bump() { setRefresh((r) => r + 1); }
 
+  // Build api object once token is available
   useEffect(() => {
     if (!isSignedIn) return;
+    getToken().then((token) => {
+      setApi(createApi(token));
+    });
+  }, [isSignedIn, refresh]);
+
+  // Fetch header stats once api is ready
+  useEffect(() => {
+    if (!api) return;
     api.getStats(currentMonth())
       .then((s) => setHeaderStats({ total: s.total, count: s.count }))
       .catch(() => {});
-  }, [refresh, isSignedIn]);
+  }, [api]);
 
   if (!isLoaded) return (
     <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)" }}>
@@ -63,17 +72,15 @@ export default function App() {
           display: "flex", alignItems: "center", justifyContent: "space-between",
           flexShrink: 0, gap: 12,
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, minWidth: 0 }}>
-            <div style={{ minWidth: 0 }}>
-              <h1 style={{
-                fontFamily: "var(--font-display)", fontWeight: 700,
-                fontSize: 20, letterSpacing: "-.02em", lineHeight: 1,
-                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
-              }}>
-                {page.title}
-              </h1>
-              <p style={{ fontSize: 11, color: "var(--text3)", marginTop: 3 }}>{page.sub}</p>
-            </div>
+          <div style={{ minWidth: 0 }}>
+            <h1 style={{
+              fontFamily: "var(--font-display)", fontWeight: 700,
+              fontSize: 20, letterSpacing: "-.02em", lineHeight: 1,
+              whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+            }}>
+              {page.title}
+            </h1>
+            <p style={{ fontSize: 11, color: "var(--text3)", marginTop: 3 }}>{page.sub}</p>
           </div>
 
           <div className="header-dots" style={{ display: "flex", alignItems: "center", gap: 5 }}>
@@ -105,10 +112,10 @@ export default function App() {
         </header>
 
         <main className="page-body" style={{ flex: 1, overflowY: "auto", padding: "24px 28px" }}>
-          {tab === "overview" && <Dashboard refresh={refresh} />}
-          {tab === "add"      && <ChatEntry onExpenseAdded={bump} />}
-          {tab === "insights" && <Insights  refresh={refresh} />}
-          {tab === "history"  && <History   refresh={refresh} onDelete={bump} />}
+          {tab === "overview" && <Dashboard refresh={refresh} api={api} />}
+          {tab === "add"      && <ChatEntry onExpenseAdded={bump} api={api} />}
+          {tab === "insights" && <Insights  refresh={refresh} api={api} />}
+          {tab === "history"  && <History   refresh={refresh} onDelete={bump} api={api} />}
         </main>
       </div>
 
