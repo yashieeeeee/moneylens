@@ -43,7 +43,7 @@ function CategoryBar({ category, amount, total, delay }) {
   );
 }
 
-export default function Dashboard({ refresh,api }) {
+export default function Dashboard({ refresh}) {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const month = currentMonth();

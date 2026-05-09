@@ -99,7 +99,7 @@ function Bubble({ msg }) {
   );
 }
 
-export default function ChatEntry({ onExpenseAdded,api }) {
+export default function ChatEntry({ onExpenseAdded}) {
   const [msgs, setMsgs] = useState([BOT_INTRO]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);

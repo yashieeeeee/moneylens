@@ -61,7 +61,7 @@ function InsightCard({ insight, delay }) {
   );
 }
 
-export default function Insights({ refresh,api }) {
+export default function Insights({ refresh }) {
   const [insights, setInsights] = useState([]);
   const [report, setReport] = useState("");
   const [loading, setLoading] = useState(true);
