@@ -42,6 +42,7 @@ function extractJSONArray(text) {
 // GET /api/insights
 router.get("/", async (req, res) => {
   const month = req.query.month || new Date().toISOString().slice(0, 7);
+  console.log("Insights userId:", req.userId, typeof req.userId);
   try {
     const result = await db.execute({
   sql: `SELECT * FROM expenses WHERE user_id = ? AND date LIKE ? ORDER BY date ASC`,
